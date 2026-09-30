@@ -1,0 +1,947 @@
+/* Walktify v0.4.1 — landscape phone screen.
+   All sizes are in vh: the UI adapts to the final resolution. */
+
+/* While Walktify is shown, the rest of Spotify is hidden
+   ("…" menu, native bars, popups). Bonus: nothing invisible gets drawn. */
+body.wk-on> :not(.wk-root),
+body.wk-on> :not(.wk-root) * {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.wk-root {
+  --wk-accent: #1ed760;
+  --wk-bg: #0c0c0c;
+  --wk-surface: #1c1c1c;
+  --wk-muted: #a7a7a7;
+  --wk-rail: 17vh;
+  --wk-cover: 27vh;
+  --wk-gap: 3vh;
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: grid;
+  grid-template-columns: var(--wk-rail) 1fr;
+  background: var(--wk-bg);
+  color: #fff;
+  font-family: var(--font-family, "Spotify Circular", sans-serif);
+  overflow: hidden;
+  user-select: none;
+}
+
+.wk-icon {
+  width: 4.5vh;
+  height: 4.5vh;
+  flex: 0 0 auto;
+}
+
+/* ---------------------------------------------------------------- sidebar */
+.wk-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2vh;
+  /* Spotify's native "…" menu is drawn top-left, outside the page:
+     keep this area empty so it doesn't overlap the gear. */
+  padding-top: max(2.5vh, 56px);
+  background: #000;
+  border-right: 0.3vh solid transparent;
+  transition: border-color 150ms;
+}
+
+.wk-rail.active {
+  border-right-color: var(--wk-accent);
+}
+
+/* Settings: small, discreet, at the very bottom; label only shows when selected */
+.wk-rail {
+  padding-bottom: 2vh;
+}
+
+.wk-rail-item.settings {
+  margin-top: auto;
+  width: 9vh;
+  padding: 1vh 0;
+  opacity: 0.45;
+}
+
+.wk-rail-item.settings .wk-icon {
+  width: 3.4vh;
+  height: 3.4vh;
+}
+
+.wk-rail-item.settings .wk-rail-label {
+  display: none;
+  font-size: 1.8vh;
+}
+
+.wk-rail-item.settings.focused {
+  opacity: 1;
+  width: 13vh;
+}
+
+.wk-rail-item.settings.focused .wk-rail-label {
+  display: block;
+}
+
+.wk-rail-item {
+  position: relative;
+  width: 14.5vh;
+  padding: 1.5vh 0;
+  border-radius: 1.5vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8vh;
+  color: var(--wk-muted);
+  transition: background 150ms, color 150ms, transform 150ms;
+}
+
+.wk-rail-item.current {
+  color: #fff;
+}
+
+.wk-rail-item.focused {
+  background: var(--wk-accent);
+  color: #000;
+  transform: scale(1.05);
+}
+
+.wk-rail-label {
+  font-size: 2.2vh;
+  font-weight: 700;
+}
+
+.wk-rail-dot {
+  position: absolute;
+  top: 1.2vh;
+  right: 2.2vh;
+  width: 1.4vh;
+  height: 1.4vh;
+  border-radius: 50%;
+  background: var(--wk-accent);
+}
+
+/* ---------------------------------------------------------------- main area */
+.wk-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+}
+
+.wk-header {
+  flex: 0 0 10vh;
+  padding: 0 5vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4vh;
+}
+
+.wk-brand {
+  font-size: 4vh;
+  font-weight: 800;
+  color: var(--wk-accent);
+}
+
+.wk-playing {
+  font-size: 2.8vh;
+  color: var(--wk-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 65%;
+}
+
+.wk-content {
+  position: relative;
+  flex: 1 1 auto;
+  overflow: hidden;
+  /* scrolling driven by Walktify, no scrollbar */
+  padding: 2vh 5vh 30vh;
+}
+
+.wk-message {
+  padding: 3vh 0;
+  font-size: 3.5vh;
+  color: var(--wk-muted);
+}
+
+/* ---------------------------------------------------------------- shortcuts (tiles) */
+.wk-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 2vh;
+  margin-bottom: 2vh;
+}
+
+.wk-tile {
+  display: flex;
+  align-items: center;
+  gap: 2vh;
+  height: 11vh;
+  border-radius: 1vh;
+  overflow: hidden;
+  background: #2a2a2a;
+  transition: background 150ms, box-shadow 150ms, transform 150ms;
+}
+
+.wk-tile-cover {
+  width: 11vh;
+  height: 11vh;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.wk-tile-cover.wk-cover-empty {
+  font-size: 5vh;
+}
+
+.wk-tile-name {
+  font-size: 2.6vh;
+  font-weight: 700;
+  line-height: 1.2;
+  padding-right: 1.5vh;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wk-tile.focused {
+  background: #3a3a3a;
+  box-shadow: 0 0 0 0.6vh var(--wk-accent);
+  transform: scale(1.03);
+}
+
+/* ---------------------------------------------------------------- card rows */
+.wk-row {
+  padding-bottom: 3vh;
+}
+
+.wk-row-title {
+  font-size: 4vh;
+  font-weight: 700;
+  margin-bottom: 1.5vh;
+}
+
+.wk-track {
+  position: relative;
+  display: flex;
+  gap: var(--wk-gap);
+  overflow: hidden;
+  padding: 2.5vh 2.5vh 1vh;
+  /* room for the scale-up + focus outline */
+  margin: -2.5vh -2.5vh 0;
+}
+
+.wk-card {
+  flex: 0 0 var(--wk-cover);
+  width: var(--wk-cover);
+}
+
+.wk-cover {
+  width: var(--wk-cover);
+  height: var(--wk-cover);
+  object-fit: cover;
+  border-radius: 1.2vh;
+  display: block;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+
+.wk-cover-empty {
+  background: #282828;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9vh;
+  font-weight: 800;
+  color: #555;
+}
+
+.wk-card-title,
+.wk-card-sub {
+  margin-top: 1.3vh;
+  font-size: 2.8vh;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--wk-muted);
+}
+
+.wk-card-sub {
+  margin-top: 0.4vh;
+  font-size: 2.3vh;
+}
+
+.wk-card.focused .wk-cover {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 0.7vh var(--wk-accent);
+}
+
+.wk-card.focused .wk-card-title {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ---------------------------------------------------------------- buttons */
+.wk-buttons {
+  display: flex;
+  gap: 2.5vh;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.wk-btn {
+  display: flex;
+  align-items: center;
+  gap: 1.5vh;
+  font-size: 3.2vh;
+  font-weight: 700;
+  padding: 1.8vh 3.5vh;
+  border-radius: 10vh;
+  background: #2a2a2a;
+  transition: transform 150ms ease-out, background 150ms, color 150ms;
+}
+
+.wk-btn.round {
+  width: 10vh;
+  height: 10vh;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4vh;
+}
+
+.wk-btn .wk-icon {
+  width: 3.8vh;
+  height: 3.8vh;
+}
+
+.wk-btn.round .wk-icon {
+  width: 4.5vh;
+  height: 4.5vh;
+}
+
+.wk-btn {
+  position: relative;
+}
+
+.wk-btn.toggled {
+  color: var(--wk-accent);
+}
+
+.wk-btn.toggled::after {
+  content: "";
+  position: absolute;
+  bottom: 1.2vh;
+  left: 50%;
+  width: 0.9vh;
+  height: 0.9vh;
+  margin-left: -0.45vh;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.wk-btn.round.toggled .wk-icon {
+  margin-bottom: 1vh;
+}
+
+.wk-btn-badge {
+  position: absolute;
+  top: 1.6vh;
+  right: 1.8vh;
+  font-size: 1.8vh;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.wk-btn.focused {
+  background: var(--wk-accent);
+  color: #000;
+  transform: scale(1.08);
+}
+
+/* ---------------------------------------------------------------- playlist / album page */
+.wk-detail {
+  display: flex;
+  gap: 5vh;
+  align-items: flex-end;
+  padding: 1vh 0 4vh;
+}
+
+.wk-detail-cover {
+  width: 40vh;
+  height: 40vh;
+  object-fit: cover;
+  border-radius: 1.5vh;
+  flex: 0 0 auto;
+}
+
+.wk-detail-info {
+  min-width: 0;
+}
+
+.wk-detail-type {
+  font-size: 2.6vh;
+  color: var(--wk-muted);
+  text-transform: capitalize;
+}
+
+.wk-detail-title {
+  font-size: 6.5vh;
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 1vh 0 1.5vh;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wk-detail-state {
+  display: flex;
+  align-items: center;
+  gap: 1vh;
+  font-size: 2.8vh;
+  color: var(--wk-muted);
+  margin-bottom: 3vh;
+}
+
+.wk-detail-state.ok {
+  color: var(--wk-accent);
+}
+
+.wk-detail-state .wk-icon {
+  width: 3vh;
+  height: 3vh;
+}
+
+/* track list */
+.wk-tr {
+  display: flex;
+  align-items: center;
+  gap: 3vh;
+  height: 10vh;
+  padding: 0 2.5vh;
+  border-radius: 1.2vh;
+  border-left: 0.6vh solid transparent;
+}
+
+.wk-tr.focused {
+  background: var(--wk-surface);
+  border-left-color: var(--wk-accent);
+}
+
+.wk-tr-num {
+  width: 4vh;
+  text-align: right;
+  font-size: 2.6vh;
+  color: var(--wk-muted);
+}
+
+.wk-tr-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.wk-tr-name,
+.wk-tr-artist {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wk-tr-name {
+  font-size: 3vh;
+}
+
+.wk-tr-artist {
+  font-size: 2.4vh;
+  color: var(--wk-muted);
+  margin-top: 0.4vh;
+}
+
+.wk-tr.focused .wk-tr-name {
+  color: var(--wk-accent);
+  font-weight: 700;
+}
+
+.wk-tr-dur {
+  font-size: 2.5vh;
+  color: var(--wk-muted);
+}
+
+/* ---------------------------------------------------------------- search */
+.wk-search {
+  display: flex;
+  align-items: center;
+  gap: 2vh;
+  height: 9vh;
+  padding: 0 3vh;
+  margin: 1vh 0 4vh;
+  border-radius: 5vh;
+  background: var(--wk-surface);
+  color: var(--wk-muted);
+  box-shadow: 0 0 0 0.5vh transparent;
+  transition: box-shadow 150ms;
+}
+
+.wk-search.focused {
+  box-shadow: 0 0 0 0.5vh var(--wk-accent);
+  color: #fff;
+}
+
+.wk-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  font: inherit;
+  font-size: 3.4vh;
+}
+
+.wk-input::placeholder {
+  color: var(--wk-muted);
+}
+
+/* ---------------------------------------------------------------- now playing */
+.wk-np {
+  display: flex;
+  gap: 6vh;
+  align-items: center;
+  padding-top: 2vh;
+}
+
+.wk-np-cover {
+  width: 62vh;
+  height: 62vh;
+  object-fit: cover;
+  border-radius: 1.5vh;
+  flex: 0 0 auto;
+}
+
+.wk-np-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.wk-np-title {
+  font-size: 6vh;
+  font-weight: 800;
+  line-height: 1.1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wk-np-artist {
+  font-size: 3.2vh;
+  color: var(--wk-muted);
+  margin: 1.5vh 0 4vh;
+}
+
+.wk-progress {
+  height: 1vh;
+  border-radius: 1vh;
+  background: #3a3a3a;
+  overflow: hidden;
+}
+
+.wk-progress-fill {
+  height: 100%;
+  background: var(--wk-accent);
+  transition: width 900ms linear;
+}
+
+.wk-np-times {
+  display: flex;
+  justify-content: space-between;
+  gap: 2vh;
+  font-size: 2.4vh;
+  color: var(--wk-muted);
+  margin-top: 1vh;
+}
+
+/* Fallback cover for Liked Songs */
+.wk-cover-liked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4a2fd6, #8fb8e8);
+  color: #fff;
+}
+
+.wk-cover-liked .wk-icon {
+  width: 45%;
+  height: 45%;
+}
+
+/* ---------------------------------------------------------------- page: Spotify-style header */
+.wk-hero-wrap {
+  margin: -2vh -5vh 2vh;
+  padding: 4vh 5vh 2vh;
+  background: linear-gradient(180deg, var(--wk-hero) 0%, var(--wk-hero) 35%, var(--wk-bg) 100%);
+  transition: background 300ms;
+}
+
+.wk-hero {
+  display: flex;
+  align-items: flex-end;
+  gap: 4vh;
+}
+
+.wk-hero-cover {
+  width: 34vh;
+  height: 34vh;
+  object-fit: cover;
+  border-radius: 1vh;
+  flex: 0 0 auto;
+  box-shadow: 0 2vh 6vh rgba(0, 0, 0, 0.5);
+}
+
+.wk-hero-info {
+  min-width: 0;
+  padding-bottom: 0.5vh;
+}
+
+.wk-hero-type {
+  font-size: 2.4vh;
+  font-weight: 600;
+}
+
+.wk-hero-title {
+  font-size: 11vh;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  margin: 0.5vh 0 2vh;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.wk-hero-title.l {
+  font-size: 8vh;
+}
+
+.wk-hero-title.xl {
+  font-size: 6vh;
+}
+
+.wk-hero-meta {
+  font-size: 2.5vh;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+/* action bar: big play button, shuffle, download */
+.wk-actions {
+  display: flex;
+  align-items: center;
+  gap: 3vh;
+  padding: 3.5vh 0 1vh;
+}
+
+.wk-act {
+  position: relative;
+  width: 8vh;
+  height: 8vh;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wk-muted);
+  transition: transform 150ms ease-out, box-shadow 150ms, color 150ms, background 150ms;
+}
+
+.wk-act .wk-icon {
+  width: 5vh;
+  height: 5vh;
+}
+
+.wk-act-play {
+  width: 11vh;
+  height: 11vh;
+  background: var(--wk-accent);
+  color: #000;
+}
+
+.wk-act-play .wk-icon {
+  width: 5.5vh;
+  height: 5.5vh;
+}
+
+.wk-act.toggled {
+  color: var(--wk-accent);
+}
+
+.wk-act-shuffle.toggled::after {
+  content: "";
+  position: absolute;
+  bottom: 0.4vh;
+  left: 50%;
+  width: 0.9vh;
+  height: 0.9vh;
+  margin-left: -0.45vh;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.wk-act.focused {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 0.5vh #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.wk-act-play.focused {
+  background: var(--wk-accent);
+  color: #000;
+}
+
+.wk-act.toggled.focused {
+  color: var(--wk-accent);
+}
+
+.wk-act-hint {
+  font-size: 2.6vh;
+  color: var(--wk-muted);
+  margin-left: 1vh;
+}
+
+/* ---------------------------------------------------------------- Now playing: cover | info grid
+   The info column always keeps room for the 5 buttons on a single line:
+   the cover is what shrinks if the screen is too narrow. */
+.wk-screen-nowplaying {
+  display: grid;
+  grid-template-columns: minmax(0, 62vh) minmax(68vh, 1fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 6vh;
+  align-content: center;
+  padding-bottom: 2vh;
+}
+
+.wk-np-top {
+  display: contents;
+}
+
+.wk-screen-nowplaying .wk-np-cover {
+  grid-column: 1;
+  grid-row: 1 / 4;
+  align-self: center;
+  width: 100%;
+  height: auto;
+  max-width: 62vh;
+  aspect-ratio: 1;
+}
+
+.wk-np-head {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  display: flex;
+  align-items: center;
+  gap: 2vh;
+  min-width: 0;
+}
+
+.wk-np-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.wk-np-head .wk-np-artist {
+  margin: 1.5vh 0 2vh;
+}
+
+.wk-np-head .wk-actions {
+  padding: 0;
+  gap: 1.5vh;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.wk-np-head .wk-act {
+  width: 7vh;
+  height: 7vh;
+}
+
+.wk-np-head .wk-act .wk-icon {
+  width: 4.5vh;
+  height: 4.5vh;
+}
+
+.wk-np-head .wk-act-hint {
+  flex-basis: 100%;
+  text-align: right;
+  font-size: 2.2vh;
+}
+
+.wk-screen-nowplaying>.wk-seek {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.wk-np-buttons {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: start;
+  padding-top: 3vh;
+}
+
+.wk-np-buttons .wk-buttons {
+  flex-wrap: nowrap;
+}
+
+/* focusable progress bar */
+.wk-seek {
+  margin: 0 -2vh;
+  padding: 2vh;
+  border-radius: 1.5vh;
+  transition: background 150ms, box-shadow 150ms;
+}
+
+.wk-seek.focused {
+  background: var(--wk-surface);
+  box-shadow: 0 0 0 0.5vh var(--wk-accent);
+}
+
+.wk-progress {
+  position: relative;
+  overflow: visible;
+  transition: height 150ms;
+}
+
+.wk-seek.focused .wk-progress {
+  height: 1.6vh;
+}
+
+.wk-progress-fill {
+  border-radius: 1vh;
+}
+
+.wk-progress-knob {
+  position: absolute;
+  top: 50%;
+  width: 3vh;
+  height: 3vh;
+  margin: -1.5vh 0 0 -1.5vh;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  transition: left 900ms linear, opacity 150ms;
+}
+
+.wk-seek.focused .wk-progress-knob {
+  opacity: 1;
+}
+
+.wk-seek-hint {
+  color: #fff;
+}
+
+/* "Downloaded" badge before the artist, in the track list */
+.wk-tr-artist {
+  display: flex;
+  align-items: center;
+  gap: 0.8vh;
+}
+
+.wk-tr-dl {
+  width: 2.4vh;
+  height: 2.4vh;
+  flex: 0 0 auto;
+  color: var(--wk-accent);
+}
+
+.wk-tr-dl.pending {
+  animation: wk-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes wk-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.wk-tr-artist-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Download in progress: circle blinks; removal confirmation: red */
+.wk-act.pending {
+  color: var(--wk-accent);
+  animation: wk-pulse 1.2s ease-in-out infinite;
+}
+
+.wk-act.confirm,
+.wk-act.confirm.focused {
+  color: #ff4d5e;
+  box-shadow: 0 0 0 0.5vh #ff4d5e;
+}
+
+/* Page: small pause button (when the playlist is playing) */
+.wk-act-pause {
+  color: #fff;
+}
+
+/* Smart Shuffle: the dot stays under the icon */
+.wk-act-shuffle.toggled::after,
+.wk-btn.toggled::after {
+  background: currentColor;
+}
+
+/* "Add to playlist" list */
+.wk-pick-cover {
+  width: 7vh;
+  height: 7vh;
+  object-fit: cover;
+  border-radius: 0.8vh;
+  flex: 0 0 auto;
+}
+
+.wk-pick-cover.wk-cover-empty {
+  font-size: 3.5vh;
+}
+
+/* Toast message */
+.wk-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 6vh;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 1.8vh 4vh;
+  border-radius: 1.2vh;
+  background: #fff;
+  color: #000;
+  font-size: 2.8vh;
+  font-weight: 700;
+  box-shadow: 0 1vh 4vh rgba(0, 0, 0, 0.5);
+}
+
+/* "Added by Smart Shuffle" badge */
+.wk-smart-badge {
+  width: 2.8vh;
+  height: 2.8vh;
+  color: var(--wk-accent);
+  margin-right: 1vh;
+  vertical-align: -0.5vh;
+  flex: 0 0 auto;
+}
+
+.wk-playing .wk-smart-badge {
+  width: 2.4vh;
+  height: 2.4vh;
+}

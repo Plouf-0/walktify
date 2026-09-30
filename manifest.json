@@ -1,0 +1,7 @@
+{
+  "name": "Walktify",
+  "icon": "<svg viewBox='0 0 24 24' fill='currentColor'><path d='M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z'/></svg>",
+  "active-icon": "<svg viewBox='0 0 24 24' fill='currentColor'><path d='M4 5h16v2H4zm0 6h16v2H4zm0 6h10v2H4z'/></svg>",
+  "subfiles": [],
+  "subfiles_extension": []
+}
