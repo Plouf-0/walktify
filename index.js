@@ -1,12 +1,12 @@
-// Walktify — Spotify UI for Walky (Spicetify custom app) — v0.8
+// Walktify — interface Spotify pour Walky (custom app Spicetify) — v0.9
 //
-// Navigation (Walky's wheels/button, simulated with the keyboard on PC):
-//   Up/Down       previous / next row
-//   Left/Right    previous / next item; Left at start of row -> sidebar
-//   Enter         activate
-//   Back          Escape, or Backspace outside text fields (on Walky: KEY_BACK / "BrowserBack")
+// Navigation (molettes/bouton de Walky, simulés au clavier sur PC) :
+//   Haut/Bas      rangée précédente / suivante
+//   Gauche/Droite élément précédent / suivant ; Gauche en début de rangée -> barre latérale
+//   Entrée        activer
+//   Retour        Échap, ou Backspace hors champ texte (sur Walky : KEY_BACK / "BrowserBack")
 //
-// Diagnostics: window.walktifyDebug() in the DevTools console.
+// Diagnostic : window.walktifyDebug() dans la console DevTools.
 
 const { React } = Spicetify;
 const h = React.createElement;
@@ -22,10 +22,10 @@ const TYPE_LABELS = {
   "your-episodes": "Tes épisodes",
 };
 
-// ------------------------------------------------------------------ icons
-// Simple SVG paths: independent of installed fonts (important on the Yocto image)
+// ------------------------------------------------------------------ icônes
+// Tracés SVG simples : indépendants des polices installées (important sur l'image Yocto)
 const ICONS = {
-  // Gear: "settings" path from Material Design Icons (Apache 2.0 license)
+  // Engrenage : tracé "settings" de Material Design Icons (licence Apache 2.0)
   settings: { fill: "M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84a.48.48 0 0 0-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87a.48.48 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" },
   home: { fill: "M12 3 3 10v11h6v-6h6v6h6V10z" },
   search: { fill: "M10 3a7 7 0 1 0 4.2 12.6l5.1 5.1 1.4-1.4-5.1-5.1A7 7 0 0 0 10 3zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10z" },
@@ -35,20 +35,32 @@ const ICONS = {
   prev: { fill: "M6 6h2v12H6zm3.5 6L18 18V6z" },
   next: { fill: "M16 6h2v12h-2zM6 18l8.5-6L6 6z" },
   repeat: { stroke: "M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4" },
-  // Smart Shuffle: sparkle top-left + crossed arrows
+  // Aléatoire amélioré : étincelle en haut à gauche + flèches croisées
   smartShuffle: [
     { fill: "M6 1.6Q6.83 5.37 10.6 6.2Q6.83 7.03 6 10.8Q5.17 7.03 1.4 6.2Q5.17 5.37 6 1.6Z" },
     { stroke: "M3 18h3.2c1.6 0 2.6-.6 3.5-1.9l4.6-6.7c.9-1.3 1.9-1.9 3.5-1.9H21M18.3 4.8 21 7.5l-2.7 2.7M8.9 9.2 10.7 11.8M12.7 14.7l1.1 1.5c.9 1.3 1.9 1.9 3.5 1.9H21M18.3 15.4 21 18.1l-2.7 2.7" },
   ],
-  // Badge for tracks added by Smart Shuffle: filled square, hollow (transparent) sparkles
+  // Pastille des titres ajoutés par l'aléatoire amélioré : carré plein, étincelles évidées (transparentes)
   smartBadge: { fill: "M5 2h14a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3zM10 7.5Q11.08 12.42 16 13.5Q11.08 14.58 10 19.5Q8.92 14.58 4 13.5Q8.92 12.42 10 7.5ZM16.8 3.8Q17.34 6.26 19.8 6.8Q17.34 7.34 16.8 9.8Q16.26 7.34 13.8 6.8Q16.26 6.26 16.8 3.8Z", rule: "evenodd" },
   heartOutline: { stroke: "M12 20s-6.5-4-8.8-8.3A4.9 4.9 0 0 1 12 6.6a4.9 4.9 0 0 1 8.8 5.1C18.5 16 12 20 12 20z" },
+  volHigh: [
+    { fill: "M3 9v6h4l5 4V5L7 9z" },
+    { stroke: "M15.5 9a4 4 0 0 1 0 6M18.5 6a8 8 0 0 1 0 12" },
+  ],
+  volLow: [{ fill: "M3 9v6h4l5 4V5L7 9z" }, { stroke: "M15.5 9a4 4 0 0 1 0 6" }],
+  volMute: [{ fill: "M3 9v6h4l5 4V5L7 9z" }, { stroke: "M16 9.5l5 5M21 9.5l-5 5" }],
   addCircle: { stroke: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8v8M8 12h8" },
+  // File d'attente : liste + lecture ; ajout à la file : liste + "+"
+  queue: [{ stroke: "M3 6h14M3 11h14M3 16h8" }, { fill: "M14 14v7l6.5-3.5z" }],
+  queueAdd: { stroke: "M3 6h14M3 11h14M3 16h8M18 13v8M14 17h8" },
+  // Historique : tracé "history" de Lucide (licence ISC)
+  history: { stroke: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8M3 3v5h5M12 7v5l4 2" },
+  close: { stroke: "M6 6l12 12M18 6 6 18" },
   shuffle: { stroke: "M3 7h4l10 10h4M3 17h4L17 7h4M18 4l3 3-3 3M18 14l3 3-3 3" },
   download: { stroke: "M12 4v11M7 10l5 5 5-5M5 20h14" },
   check: { stroke: "M5 12l5 5 9-10" },
   heart: { fill: "M12 21s-7-4.4-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.6-9.5 9-9.5 9z" },
-  // Spotify-style download: circle + arrow (empty = not downloaded, filled = downloaded)
+  // Téléchargement façon Spotify : cercle + flèche (vide = pas téléchargé, plein = téléchargé)
   dlCircle: { stroke: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7.5v8.5M8.5 12.5 12 16l3.5-3.5" },
   dlDone: [
     { fill: "M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19z" },
@@ -86,11 +98,13 @@ const RAIL = [
   { id: "home", label: "Accueil", icon: "home" },
   { id: "search", label: "Recherche", icon: "search" },
   { id: "nowplaying", label: "En cours", icon: "note" },
-  // Settings: small discreet button at the very bottom of the bar (reached by going down)
+  { id: "queue", label: "File d'attente", icon: "queue" },
+  { id: "history", label: "Historique", icon: "history" },
+  // Réglages : petit bouton discret tout en bas de la barre (on y arrive en descendant)
   { id: "settings", label: "Réglages", icon: "settings" },
 ];
 
-// ------------------------------------------------------------------ utilities
+// ------------------------------------------------------------------ utilitaires
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const safe = (fn, fallback) => {
   try {
@@ -127,7 +141,7 @@ function typeFromUri(uri) {
   return uri.split(":")[1] || "unknown";
 }
 
-// Normalizes a GraphQL item (highly variable shapes) into { type, uri, name, images, subtitle }
+// Normalise un élément venant de GraphQL (formes très variables) vers { type, uri, name, images, subtitle }
 function normalize(entry) {
   const d = entry && ((entry.item && entry.item.data) || (entry.content && entry.content.data) || entry.data || entry);
   if (!d || !d.uri) return null;
@@ -149,8 +163,8 @@ function normalize(entry) {
 }
 
 // ------------------------------------------------------------------ GraphQL
-// Query names and variables change across Spotify versions:
-// read the expected variables straight from the definition, and fill them in.
+// Les noms et variables des requêtes changent selon les versions de Spotify :
+// on lit les variables attendues directement dans la définition, et on complète.
 function gqlDef(...names) {
   const D = (Spicetify.GraphQL && Spicetify.GraphQL.Definitions) || {};
   for (const n of names) if (D[n]) return { name: n, def: D[n] };
@@ -180,7 +194,7 @@ async function gql(names, wanted) {
   try {
     r = await Spicetify.GraphQL.Request(found.def, vars);
   } catch (e) {
-    // The error response body usually names the rejected or missing parameter
+    // Le corps de la réponse d'erreur indique en général le paramètre refusé ou manquant
     let body = e && (e.body || e.data || e.response);
     try {
       body = typeof body === "string" ? body : JSON.stringify(body);
@@ -207,7 +221,7 @@ window.walktifyDebug = function () {
   return { graphql: out, platform };
 };
 
-// ------------------------------------------------------------------ Spotify data
+// ------------------------------------------------------------------ données Spotify
 function flattenRootlist(items) {
   const out = [];
   for (const i of items || []) {
@@ -217,8 +231,8 @@ function flattenRootlist(items) {
   return out;
 }
 
-// Home shortcuts: the first 8 library items, in
-// sidebar order (pinned then recent). Also works offline.
+// Raccourcis de l'accueil : les 8 premiers éléments de la bibliothèque, dans l'ordre
+// de la barre latérale (épinglés puis récents). Fonctionne aussi hors-ligne.
 async function loadShortcuts() {
   const r = await Spicetify.Platform.LibraryAPI.getContents({ limit: 20, offset: 0 });
   const items = (r.items || [])
@@ -231,6 +245,39 @@ async function loadShortcuts() {
   return items.slice(0, 8);
 }
 
+// Rangée "Récents" : éléments récemment écoutés.
+// 1. Si le client expose une API d'historique (nom contenant "Recent"), on l'utilise,
+//    à condition qu'elle renvoie des éléments complets (nom + adresse).
+// 2. Sinon, secours : la bibliothèque dans l'ordre "Récents" de la barre latérale
+//    (fonctionne aussi hors-ligne). La console indique la source utilisée.
+const withCollectionType = (i) => ({ ...i, type: typeFromUri(i.uri) === "collection" ? "collection" : i.type });
+
+async function loadRecents(limit = 20) {
+  const P = Spicetify.Platform;
+  for (const key of Object.keys(P).filter((k) => /recent/i.test(k))) {
+    const api = P[key];
+    for (const m of ["getContexts", "getContents", "getItems", "getRecentlyPlayed"]) {
+      if (!api || typeof api[m] !== "function") continue;
+      try {
+        const r = await api[m]({ limit, offset: 0 });
+        const raw = (Array.isArray(r) ? r : r && (r.items || r.contexts || r.contents)) || [];
+        const items = raw
+          .map((x) => (x && x.uri ? x : x && (x.context || x.item)))
+          .filter((x) => x && x.uri && x.name && x.type !== "folder");
+        if (items.length) {
+          console.log(`[Walktify] Récents via ${key}.${m}`);
+          return items.slice(0, limit).map(withCollectionType);
+        }
+      } catch (e) {
+        console.warn(`[Walktify] Récents : ${key}.${m} refusé`, e);
+      }
+    }
+  }
+  const r = await P.LibraryAPI.getContents({ limit, offset: 0 });
+  console.log("[Walktify] Récents via la bibliothèque (ordre « Récents » de la barre latérale)");
+  return (r.items || []).filter((i) => i.type !== "folder").map(withCollectionType);
+}
+
 async function loadHome() {
   const P = Spicetify.Platform;
   const rows = [];
@@ -239,6 +286,12 @@ async function loadHome() {
     for (let i = 0; i < sc.length; i += 4) rows.push({ kind: "tiles", key: "tiles" + i, items: sc.slice(i, i + 4) });
   } catch (e) {
     console.warn("[Walktify] raccourcis :", e);
+  }
+  try {
+    const recents = await loadRecents();
+    if (recents.length) rows.push({ kind: "cards", key: "recents", title: "Récents", items: recents });
+  } catch (e) {
+    console.warn("[Walktify] récents :", e);
   }
   try {
     const r = await P.RootlistAPI.getContents();
@@ -276,7 +329,7 @@ const mapGqlTrack = (t) => ({
   duration: t.duration && t.duration.totalMilliseconds,
 });
 
-// Loads every page of a list (large playlists span several pages)
+// Charge toutes les pages d'une liste (les grandes playlists dépassent une page)
 async function fetchAllPages(fetchPage, pageSize = 200, max = 3000) {
   const all = [];
   for (let offset = 0; offset < max; offset += pageSize) {
@@ -289,7 +342,7 @@ async function fetchAllPages(fetchPage, pageSize = 200, max = 3000) {
   return all;
 }
 
-// Track list of a page. Each source is isolated and logged.
+// Liste des titres d'une fiche. Chaque source est isolée et journalisée.
 async function loadTracks(item) {
   try {
     if (item.type === "collection") {
@@ -319,11 +372,11 @@ async function loadTracks(item) {
   return [];
 }
 
-// Search through the internal GraphQL (the one the app itself uses).
-// - Spotify 1.2.96 uses "searchModalResults"; "searchDesktop" still exists but is
-//   deprecated (rejected with 400): now only a fallback for other versions.
-// - The response is a single mixed list (topResultsV2.itemsV2): sort it by type.
-// - The public Web API (api.spotify.com) is unusable: 429 with the client's token.
+// Recherche via le GraphQL interne (celui qu'utilise l'app elle-même).
+// - Spotify 1.2.96 utilise "searchModalResults" ; "searchDesktop" existe encore mais est
+//   périmé (refusé en 400) : il ne sert plus que de secours pour d'autres versions.
+// - La réponse est une liste unique mélangée (topResultsV2.itemsV2) : on la trie par type.
+// - L'API web publique (api.spotify.com) n'est pas utilisable : 429 pour le jeton du client.
 const SEARCH_SECTIONS = [
   ["track", "Titres"],
   ["artist", "Artistes"],
@@ -351,7 +404,7 @@ async function searchSpotify(query) {
   const s = data.searchV2 || data.search || {};
   const list = (x) => ((x && (x.itemsV2 || x.items)) || []).map(normalize).filter(Boolean);
 
-  // Top results + separate sections if the Spotify version returns them
+  // Résultats principaux + sections séparées si la version de Spotify en renvoie
   const all = [
     ...list(s.topResultsV2),
     ...list(s.tracksV2 || s.tracks),
@@ -370,20 +423,20 @@ async function searchSpotify(query) {
   return rows;
 }
 
-// ------------------------------------------------------------------ offline
-// Internal download service (the one Spotify's native pages use):
-//   getContexts / subscribeContexts({ uris })  -> state of a playlist / album / Liked Songs
-//   getItems    / subscribeItems({ uris })     -> state of each track
-// Observed "state" codes: 0 = not downloaded, 3 = downloaded. Others (1, 2…) are
-// assumed to be "pending" / "in progress": treated as a download in progress.
+// ------------------------------------------------------------------ hors-ligne
+// Service interne de téléchargement (celui qu'utilisent les pages natives de Spotify) :
+//   getContexts / subscribeContexts({ uris })  -> état d'une playlist / d'un album / des Titres likés
+//   getItems    / subscribeItems({ uris })     -> état de chaque titre
+// Codes "state" observés : 0 = pas téléchargé, 3 = téléchargé. Les autres (1, 2…) sont
+// supposés être "en attente" / "en cours" : traités comme un téléchargement en cours.
 const offlineService = () => Spicetify.Platform.OfflineAPI._offline;
 const offlineUser = () =>
   safe(() => Spicetify.Platform.OfflineAPI._username, null) ||
   safe(() => Spicetify.Platform.OfflineAPI.getEvents()._username, null) ||
   safe(() => Spicetify.Platform.username, null);
 
-// URI known to the offline module. Liked Songs: spotify:user:<id>:collection
-// (spotify:collection:tracks also exists, but the module doesn't track it).
+// Adresse connue du module hors-ligne. Titres likés : spotify:user:<identifiant>:collection
+// (spotify:collection:tracks existe aussi, mais le module ne le suit pas).
 function offlineUri(item) {
   return item.type === "collection" ? `spotify:user:${offlineUser()}:collection` : item.uri;
 }
@@ -416,7 +469,7 @@ async function setDownload(item, add) {
   const uri = offlineUri(item);
   try {
     if (item.type === "collection") {
-      // The "high-level" module ignores Liked Songs: use the internal service
+      // Le module "haut niveau" ignore les Titres likés : on passe par le service interne
       const off = offlineService();
       await (add ? off.addDownload({ uri }) : off.removeDownload({ uri }));
     } else {
@@ -429,7 +482,7 @@ async function setDownload(item, add) {
   }
 }
 
-// User display name (the offline module only knows the technical id)
+// Nom affiché de l'utilisateur (le module hors-ligne ne connaît que son identifiant technique)
 let userDisplayName = null;
 safe(() =>
   Promise.resolve(Spicetify.Platform.UserAPI.getUser()).then((u) => {
@@ -439,7 +492,7 @@ safe(() =>
 );
 
 async function playTrack(context, track, index) {
-  // Plays the track IN its context (playlist/album/liked songs) so the next ones follow
+  // Lit le titre DANS son contexte (playlist/album/titres likés) pour que la suite s'enchaîne
   if (context && DOWNLOADABLE.includes(context.type)) {
     try {
       await Spicetify.Player.playUri(context.uri, {}, { skipTo: { uri: track.uri, index } });
@@ -451,10 +504,10 @@ async function playTrack(context, track, index) {
   Spicetify.Player.playUri(track.uri);
 }
 
-// ------------------------------------------------------------------ player
-// Smart Shuffle: availability depends on the account and playlist
-// (not on albums, nor some editorial playlists). Read the state from the
-// internal player and any restrictions that apply to it.
+// ------------------------------------------------------------------ lecteur
+// Aléatoire amélioré (Smart Shuffle) : disponible selon le compte et la playlist
+// (pas sur les albums, ni sur certaines playlists éditoriales). On lit l'état dans le
+// lecteur interne et les éventuelles restrictions qui le concernent.
 function smartShuffleInfo() {
   const api = Spicetify.Platform.PlayerAPI;
   const st = safe(() => api._state, null) || {};
@@ -469,12 +522,12 @@ function smartShuffleInfo() {
   return { on: !!st.smartShuffle, available: allowed };
 }
 
-// Per-playlist shuffle, like the native playback bar:
-//   ShuffleAPI.getShuffle(context)                -> current mode
-//   ShuffleAPI.getAvailableShuffleModes(context)  -> modes allowed for this context
-//   ShuffleAPI.setShuffle(context, mode, {…})     -> changes mode
-// Observed modes: 0 = off, 1 = shuffle, 2 = smart shuffle.
-// Fallback for versions without ShuffleAPI: the player's plain shuffle.
+// Aléatoire par playlist, comme la barre de lecture native :
+//   ShuffleAPI.getShuffle(contexte)               -> mode actuel
+//   ShuffleAPI.getAvailableShuffleModes(contexte) -> modes permis pour ce contexte
+//   ShuffleAPI.setShuffle(contexte, mode, {…})    -> change de mode
+// Modes observés : 0 = désactivé, 1 = aléatoire, 2 = aléatoire amélioré.
+// Secours pour les versions sans ShuffleAPI : l'aléatoire simple du lecteur.
 const SHUFFLE_OFF = 0, SHUFFLE_ON = 1, SHUFFLE_SMART = 2;
 const shuffleApi = () => Spicetify.Platform.ShuffleAPI;
 
@@ -499,7 +552,7 @@ async function setShuffleMode(ctx, mode) {
   return Spicetify.Platform.PlayerAPI.setShuffle(mode !== SHUFFLE_OFF);
 }
 
-// Shuffle state for a context (displayed playlist or now playing)
+// État de l'aléatoire pour un contexte (playlist affichée ou lecture en cours)
 function useShuffle(ctx, playerKey, onError) {
   const [st, setSt] = useState({ ctx: null, mode: SHUFFLE_OFF, modes: [SHUFFLE_OFF, SHUFFLE_ON] });
   const refresh = () => {
@@ -547,7 +600,7 @@ function shuffleButton(shuf, extra) {
   };
 }
 
-// Add the current track to a playlist: several methods depending on Spotify version
+// Ajout du titre en cours à une playlist : plusieurs méthodes selon les versions de Spotify
 async function addToPlaylist(playlistUri, trackUri) {
   const api = Spicetify.Platform.PlaylistAPI;
   const attempts = [
@@ -575,7 +628,7 @@ async function addToPlaylist(playlistUri, trackUri) {
   throw new Error("aucune méthode d'ajout n'a fonctionné");
 }
 
-// Playlists tracks can be added to: own and collaborative ones
+// Playlists où l'on peut ajouter des titres : les siennes et les collaboratives
 async function loadEditablePlaylists() {
   const r = await Spicetify.Platform.RootlistAPI.getContents();
   const all = flattenRootlist(r.items).filter((i) => i.type === "playlist");
@@ -587,12 +640,12 @@ async function loadEditablePlaylists() {
       p.collaborative ||
       (p.owner && (p.owner.username === me || (p.owner.uri || "").endsWith(":" + me)))
   );
-  return mine.length ? mine : all; // if fields are missing, let Spotify refuse if needed
+  return mine.length ? mine : all; // si les champs manquent, on laisse Spotify refuser au besoin
 }
 
-// Track added by Smart Shuffle (not in the original playlist)?
-// Observed marker: metadata.provider = "enhanced_recommendation". Beware, the
-// "smart-shuffle-signals" field is present on ALL tracks played in this mode: unusable.
+// Titre ajouté par l'aléatoire amélioré (absent de la playlist d'origine) ?
+// Marqueur observé : metadata.provider = "enhanced_recommendation". Attention, le champ
+// "smart-shuffle-signals" est présent sur TOUS les titres joués dans ce mode : inutilisable.
 function isSmartShuffleItem(it) {
   const provider = safe(() => it.metadata.provider, "") || "";
   return provider === "enhanced_recommendation" || /recommendation/i.test(provider);
@@ -604,6 +657,10 @@ window.walktifyItem = function () {
   console.log("[Walktify] titre en cours :", out);
   return out;
 };
+
+const currentContextUri = (d = Spicetify.Player.data) =>
+  safe(() => (d.context && d.context.uri) || d.context_uri, null) ||
+  safe(() => Spicetify.Platform.PlayerAPI._state.context.uri, null);
 
 function readPlayer() {
   const P = Spicetify.Player;
@@ -618,11 +675,10 @@ function readPlayer() {
     shuffle: safe(() => P.getShuffle(), false),
     smart: smartShuffleInfo(),
     liked: safe(() => P.getHeart(), false),
+    volume: safe(() => P.getVolume(), 1), // 0 à 1 : volume de Spotify (pas le volume système)
     smartItem: isSmartShuffleItem(it),
-    contextUri:
-      safe(() => (P.data.context && P.data.context.uri) || P.data.context_uri, null) ||
-      safe(() => Spicetify.Platform.PlayerAPI._state.context.uri, null),
-    repeat: safe(() => P.getRepeat(), 0), // 0 = off, 1 = context, 2 = track
+    contextUri: currentContextUri(),
+    repeat: safe(() => P.getRepeat(), 0), // 0 = non, 1 = contexte, 2 = titre
     progress: safe(() => P.getProgress(), 0),
     duration: safe(() => P.getDuration(), 0),
   };
@@ -639,7 +695,7 @@ function usePlayer(live) {
       Spicetify.Player.removeEventListener("onplaypause", update);
     };
   }, []);
-  // Progress refreshed only while the "Now playing" screen is shown
+  // Progression rafraîchie seulement quand l'écran "En cours" est affiché
   useEffect(() => {
     if (!live) return;
     const t = setInterval(() => setState(readPlayer()), 1000);
@@ -648,7 +704,102 @@ function usePlayer(live) {
   return [state, () => setState(readPlayer())];
 }
 
-// ------------------------------------------------------------------ display components
+// ------------------------------------------------------------------ file d'attente
+// Même service que la file d'attente native :
+//   PlayerAPI.getQueue()                    -> { current, queued, nextUp } (titres ajoutés, puis suite du contexte)
+//   PlayerAPI.addToQueue([{ uri }])         -> ajoute après les titres déjà ajoutés
+//   PlayerAPI.removeFromQueue([{ uri, uid }])
+//   PlayerAPI.skipToNext({ uri, uid })      -> saute à ce titre (comme un clic dans la file native)
+//   événement "queue_update" sur PlayerAPI.getEvents()
+const playerApi = () => Spicetify.Platform.PlayerAPI;
+const queueRef = (t) => ({ uri: t.uri, uid: t.uid || null });
+
+function addToQueue(uri) {
+  const api = playerApi();
+  return typeof api.addToQueue === "function" ? api.addToQueue([{ uri }]) : Spicetify.addToQueue([{ uri }]);
+}
+
+const mapQueueTrack = (t) => {
+  const ms = t.duration && t.duration.milliseconds;
+  return {
+    uri: t.uri,
+    uid: t.uid,
+    name: t.name,
+    artist: (t.artists || []).map((a) => a.name).join(", "),
+    duration: ms > 0 ? ms : undefined, // -1 quand Spotify ne la connaît pas
+    cover: imageUrl(t.album),
+  };
+};
+
+function useQueue(active) {
+  const read = () => safe(() => playerApi().getQueue(), null);
+  const [queue, setQueue] = useState(read);
+  useEffect(() => {
+    if (!active) return;
+    const update = (e) => setQueue((e && e.data) || read());
+    update();
+    const events = safe(() => playerApi().getEvents(), null);
+    const off = events && safe(() => events.addListener("queue_update", update), null);
+    return () => (typeof off === "function" ? off() : events && safe(() => events.removeListener("queue_update", update)));
+  }, [active]);
+  return queue;
+}
+
+// ------------------------------------------------------------------ historique
+// Spotify n'expose que les playlists/albums récents, pas les titres écoutés : Walktify tient
+// son propre journal (le plus récent en premier), conservé dans le stockage local.
+// Un titre passé moins de 8 s après son début n'est pas gardé.
+const HISTORY_KEY = "walktify:history";
+const HISTORY_MAX = 200;
+const HISTORY_MIN_MS = 8000;
+const playHistory = safe(() => {
+  const saved = JSON.parse(localStorage.getItem(HISTORY_KEY));
+  return Array.isArray(saved) ? saved : [];
+}, []);
+
+function recordPlayed() {
+  const d = Spicetify.Player.data;
+  const it = d && d.item;
+  if (!it || !/^spotify:(track|episode|local):/.test(it.uri || "")) return; // pas les publicités
+  const last = playHistory[0];
+  if (last && last.uri === it.uri) return;
+  if (last && Date.now() - last.at < HISTORY_MIN_MS) playHistory.shift();
+  const md = it.metadata || {};
+  // Contexte gardé pour relire le titre dans sa playlist / son album, sauf s'il n'en fait
+  // pas partie (ajouté à la file d'attente, lecture automatique, aléatoire amélioré)
+  const inContext = (!it.provider || it.provider === "context") && !isSmartShuffleItem(it);
+  playHistory.unshift({
+    uri: it.uri,
+    name: it.name || md.title || "",
+    artist: (it.artists && it.artists.map((a) => a.name).join(", ")) || md.artist_name || "",
+    cover: fixImage(md.image_url || md.image_large_url) || null,
+    context: inContext ? currentContextUri(d) : null,
+    at: Date.now(),
+  });
+  playHistory.length = Math.min(playHistory.length, HISTORY_MAX);
+  safe(() => localStorage.setItem(HISTORY_KEY, JSON.stringify(playHistory)));
+}
+// Enregistré ici (et non dans l'interface) pour suivre la lecture même hors de l'écran Historique
+safe(() => {
+  Spicetify.Player.addEventListener("songchange", recordPlayed);
+  recordPlayed(); // titre déjà chargé au démarrage
+});
+
+function playFromHistory(entry) {
+  playTrack(entry.context ? { type: typeFromUri(entry.context), uri: entry.context } : null, entry);
+}
+
+const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+function dayLabel(ts) {
+  const d = new Date(ts);
+  const days = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(ts).setHours(0, 0, 0, 0)) / 86400000);
+  if (days === 0) return "Aujourd'hui";
+  if (days === 1) return "Hier";
+  return capitalize(d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }));
+}
+const fmtClock = (ts) => new Date(ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+// ------------------------------------------------------------------ composants d'affichage
 function Cover({ item, url, className }) {
   const src = url || imageUrl(item);
   if (src) return h("img", { className, src, alt: "" });
@@ -718,10 +869,10 @@ function Buttons({ items, col, active }) {
   );
 }
 
-// Dominant color of a cover (for the header gradient, like Spotify)
+// Couleur dominante d'une pochette (pour le dégradé de l'en-tête, comme Spotify)
 const colorCache = {};
-// Playlists without a cover have a "mosaic" (spotify:mosaic:id1:id2:…) that the browser
-// can't read in a canvas (CORS error): use the mosaic's first image.
+// Les playlists sans pochette ont une "mosaïque" (spotify:mosaic:id1:id2:…) que le navigateur
+// ne peut pas lire en canvas (erreur CORS) : on prend la première image de la mosaïque.
 function colorSource(url) {
   if (!url) return null;
   if (url.startsWith("spotify:mosaic:")) return "https://i.scdn.co/image/" + url.split(":")[2];
@@ -749,7 +900,7 @@ function useCoverColor(url, fallback) {
           b += d[i + 2];
         }
         const n = d.length / 4;
-        const k = 0.8; // slightly darkened to keep white text readable
+        const k = 0.8; // un peu assombri pour garder le texte blanc lisible
         const col = `rgb(${Math.round((r / n) * k)},${Math.round((g / n) * k)},${Math.round((b / n) * k)})`;
         colorCache[url] = col;
         if (alive) setColor(col);
@@ -808,7 +959,7 @@ function ActionBar({ items, col, active }) {
         h(Icon, { name: b.icon })
       );
     }),
-    // No hover or tooltip on Walky: spell out what the selected button does
+    // Pas de survol ni d'infobulle sur Walky : on écrit ce que fait le bouton sélectionné
     active && items[col] && h("div", { className: "wk-act-hint" }, items[col].hint)
   );
 }
@@ -837,12 +988,21 @@ function DetailHeader({ row, col, active }) {
   );
 }
 
-function TrackRow({ row, active }) {
+// Rangée de titre. Élément 0 = le titre (Entrée : lire) ; élément 1 facultatif = petit bouton
+// en bout de rangée (file d'attente), atteint avec Droite et visible sur la rangée sélectionnée.
+function TrackRow({ row, col, active }) {
   const t = row.track;
+  const btn = row.items[1];
+  const onBtn = active && !!btn && col === 1;
   return h(
     "div",
-    { className: "wk-tr" + (active ? " focused" : ""), ...focusAttr(active) },
-    h("div", { className: "wk-tr-num" }, row.index + 1),
+    {
+      className: "wk-tr" + (row.playing ? " playing" : "") + (active ? " focused" : "") + (onBtn ? " on-btn" : ""),
+      ...focusAttr(active),
+    },
+    row.cover !== undefined
+      ? h(Cover, { url: row.cover, item: { name: t.name }, className: "wk-tr-cover" })
+      : h("div", { className: "wk-tr-num" }, row.index + 1),
     h(
       "div",
       { className: "wk-tr-main" },
@@ -850,13 +1010,15 @@ function TrackRow({ row, active }) {
       h(
         "div",
         { className: "wk-tr-artist" },
-        // Green badge like Spotify: filled = downloaded, outline = in progress
+        // Pastille verte comme dans Spotify : pleine = téléchargé, contour = en cours
         row.offline === "yes" && h(Icon, { name: "dlDone", className: "wk-tr-dl" }),
         row.offline && row.offline !== "yes" && row.offline !== "no" && h(Icon, { name: "dlCircle", className: "wk-tr-dl pending" }),
         h("span", { className: "wk-tr-artist-text" }, t.artist)
       )
     ),
-    h("div", { className: "wk-tr-dur" }, fmtTime(t.duration))
+    onBtn && h("div", { className: "wk-tr-hint" }, btn.hint),
+    h("div", { className: "wk-tr-dur" }, row.right !== undefined ? row.right : fmtTime(t.duration)),
+    btn && h("div", { className: "wk-tr-btn" + (onBtn ? " focused" : "") }, h(Icon, { name: btn.icon }))
   );
 }
 
@@ -875,13 +1037,13 @@ function InputRow({ row, active, inputRef }) {
   );
 }
 
-// "Now playing": cover | info grid. Three focusable rows:
-//   0 = like / add to playlist, 1 = progress bar, 2 = playback buttons
+// "En cours" : grille pochette | infos. Trois rangées focusables :
+//   0 = like / ajouter à une playlist, 1 = barre de progression, 2 = boutons de lecture
 function NpTop({ row, col, active }) {
   const p = row.player;
   return h(
     "div",
-    { className: "wk-np-top" }, // display: contents -> its children are placed in the grid
+    { className: "wk-np-top" }, // display: contents -> ses enfants se placent dans la grille
     h(Cover, { url: p.cover, item: { name: p.title }, className: "wk-np-cover" }),
     h(
       "div",
@@ -928,7 +1090,7 @@ function NpButtons({ row, col, active }) {
   return h("div", { className: "wk-np-buttons" }, h(Buttons, { items: row.items, col, active }));
 }
 
-// Playlist list for "add to playlist"
+// Liste de playlists pour "ajouter à une playlist"
 function PickRow({ row, active }) {
   const pl = row.playlist;
   return h(
@@ -944,7 +1106,45 @@ function PickRow({ row, active }) {
   );
 }
 
-// Seek within the track, accelerated when the wheel turns fast
+// Rangée 4 de "En cours" : volume (gauche/droite = −/+, Entrée = couper / rétablir le son)
+function NpVolume({ row, active }) {
+  const v = clamp(row.player.volume || 0, 0, 1);
+  const pct = Math.round(v * 100);
+  return h(
+    "div",
+    { className: "wk-vol" + (active ? " focused" : ""), ...focusAttr(active) },
+    h(Icon, { name: v === 0 ? "volMute" : v < 0.5 ? "volLow" : "volHigh" }),
+    h(
+      "div",
+      { className: "wk-vol-bar" },
+      h("div", { className: "wk-vol-fill", style: { width: pct + "%" } }),
+      h("div", { className: "wk-vol-knob", style: { left: pct + "%" } })
+    ),
+    h("div", { className: "wk-vol-pct" }, active ? `${pct} % · Entrée : ${v === 0 ? "rétablir" : "couper"}` : `${pct} %`)
+  );
+}
+
+// Volume par pas de 5 %, 10 % si on tourne vite ; mémorise le niveau avant coupure
+const volState = { last: 0, streak: 0, beforeMute: 0.5 };
+function volumeBy(dir) {
+  const now = Date.now();
+  volState.streak = now - volState.last < 300 ? volState.streak + 1 : 0;
+  volState.last = now;
+  const step = volState.streak > 4 ? 0.1 : 0.05;
+  const P = Spicetify.Player;
+  const v = safe(() => P.getVolume(), 0.5);
+  P.setVolume(clamp(Math.round((v + dir * step) * 100) / 100, 0, 1));
+}
+function toggleMute() {
+  const P = Spicetify.Player;
+  const v = safe(() => P.getVolume(), 0.5);
+  if (v > 0) {
+    volState.beforeMute = v;
+    P.setVolume(0);
+  } else P.setVolume(volState.beforeMute || 0.5);
+}
+
+// Avance/recul dans le titre, accéléré quand on tourne la molette vite
 const seekState = { last: 0, streak: 0 };
 function seekBy(dir) {
   const now = Date.now();
@@ -973,12 +1173,16 @@ function Row(props) {
       return h(NpTop, props);
     case "npSeek":
       return h(NpSeek, props);
+    case "npVolume":
+      return h(NpVolume, props);
     case "pick":
       return h(PickRow, props);
     case "npButtons":
       return h(NpButtons, props);
     case "message":
       return h("div", { className: "wk-message" }, props.row.text);
+    case "title":
+      return h("div", { className: "wk-list-title" }, props.row.text);
     default:
       return h("div");
   }
@@ -995,11 +1199,18 @@ function Walktify() {
   const [railIndex, setRailIndex] = useState(0);
   const top = stack[stack.length - 1];
   const section =
-    top.type === "nowplaying" || top.type === "pick" ? "nowplaying" : stack.some((sc) => sc.type === "search") ? "search" : "home";
+    top.type === "nowplaying" || top.type === "pick"
+      ? "nowplaying"
+      : top.type === "queue" || top.type === "history"
+        ? top.type
+        : stack.some((sc) => sc.type === "search")
+          ? "search"
+          : "home";
   const [player, refreshPlayer] = usePlayer(top.type === "nowplaying");
+  const queue = useQueue(top.type === "queue");
   const shuffleCtx =
     top.type === "detail" && ["playlist", "album", "collection"].includes(top.item.type)
-      ? offlineUri(top.item) // Liked Songs: spotify:user:<id>:collection, like the player
+      ? offlineUri(top.item) // Titres likés : spotify:user:<identifiant>:collection, comme le lecteur
       : top.type === "nowplaying"
         ? player.contextUri
         : null;
@@ -1017,7 +1228,27 @@ function Walktify() {
   };
   const searchTimer = useRef(null);
 
-  // ---------- screen stack
+  // Action Spotify avec message en cas d'échec (détails dans la console)
+  const attempt = (fn, failText, okText) =>
+    Promise.resolve()
+      .then(fn)
+      .then(
+        () => okText && showToast(okText),
+        (e) => {
+          console.warn(`[Walktify] ${failText} :`, e);
+          showToast(failText);
+        }
+      );
+
+  // Petit bouton "ajouter à la file d'attente" en bout de rangée de titre
+  const queueButton = (t) => ({
+    id: "queue",
+    icon: "queueAdd",
+    hint: "Ajouter à la file d'attente",
+    activate: () => attempt(() => addToQueue(t.uri), "Impossible d'ajouter à la file d'attente", `« ${t.name} » ajouté à la file d'attente`),
+  });
+
+  // ---------- pile d'écrans
   const updateScreen = (id, patch) =>
     setStack((s) => s.map((sc) => (sc.id === id ? { ...sc, ...(typeof patch === "function" ? patch(sc) : patch) } : sc)));
 
@@ -1039,13 +1270,18 @@ function Walktify() {
 
   function goRail(target) {
     setZone("content");
-    if (target === "settings") Spicetify.Platform.History.push("/preferences"); // native settings
+    if (target === "settings") Spicetify.Platform.History.push("/preferences"); // réglages natifs
     else if (target === "home") setStack((s) => [s[0]]);
     else if (target === "search") {
       const existing = stack.find((sc) => sc.type === "search");
       setStack((s) => [s[0], existing || newScreen({ type: "search", query: "", results: null })]);
     } else if (target === "nowplaying" && top.type !== "nowplaying") {
-      push({ type: "nowplaying", focus: { row: 2, cols: [0, 0, 2] } }); // focus on play/pause
+      push({ type: "nowplaying", focus: { row: 2, cols: [0, 0, 2, 0] } }); // focus sur lecture/pause
+    } else if (target === "queue" || target === "history") {
+      // Comme "En cours" : s'ouvre par-dessus l'écran actuel (Retour y ramène) ; déjà ouvert -> on y revient
+      const i = stack.findIndex((sc) => sc.type === target);
+      if (i >= 0) setStack((s) => s.slice(0, i + 1));
+      else push({ type: target });
     }
   }
 
@@ -1073,7 +1309,7 @@ function Walktify() {
       });
   }
 
-  // ---------- rows of the current screen
+  // ---------- rangées de l'écran courant
   const withActivate = (items) => items.map((it) => ({ ...it, activate: () => openItem(it) }));
 
   function buildRows() {
@@ -1086,14 +1322,14 @@ function Walktify() {
     if (top.type === "detail") {
       const it = top.item;
       const P = Spicetify.Player;
-      // Is this page the currently playing context?
-      // Liked Songs: the player refers to them in several forms (…:collection, spotify:collection:tracks…)
+      // Cette fiche est-elle le contexte en cours de lecture ?
+      // Titres likés : le lecteur les désigne sous plusieurs formes (…:collection, spotify:collection:tracks…)
       const ctx = player.contextUri || "";
       const isCurrent =
         it.type === "collection"
           ? /(^spotify:collection|:collection)(:tracks)?$/.test(ctx)
           : !!ctx && (ctx === it.uri || ctx === offlineUri(it));
-      const btns = [{ id: "play", icon: "play", hint: "Lire", activate: () => P.playUri(it.uri) }];
+      const btns = [{ id: "play", icon: "play", hint: "Lire depuis le début", activate: () => P.playUri(it.uri) }];
       if (isCurrent) {
         btns.push({
           id: "pause",
@@ -1104,9 +1340,9 @@ function Walktify() {
       }
       btns.push(shuffleButton(shuf));
       if (DOWNLOADABLE.includes(it.type)) {
-        const off = top.offline; // { state, pct } or null while loading
+        const off = top.offline; // { state, pct } ou null pendant le chargement
         const st = off && off.state;
-        // Removing a download is confirmed by a second press (like Spotify's confirmation)
+        // Retirer un téléchargement se confirme par un second appui (comme la confirmation de Spotify)
         const confirming = top.confirmRemove && Date.now() - top.confirmRemove < 4000;
         btns.push({
           id: "dl",
@@ -1144,7 +1380,7 @@ function Walktify() {
           track: t,
           index: i,
           offline: top.trackStates ? top.trackStates[t.uri] : null,
-          items: [{ activate: () => playTrack(it, t, i) }],
+          items: [{ activate: () => playTrack(it, t, i) }, queueButton(t)],
         })
       );
       return rows;
@@ -1195,6 +1431,69 @@ function Walktify() {
       return rows;
     }
 
+    if (top.type === "queue") {
+      if (!queue) return [{ kind: "message", key: "m", text: "File d'attente indisponible", items: [] }];
+      const rows = [];
+      if (queue.current) {
+        const cur = mapQueueTrack(queue.current);
+        rows.push({ kind: "title", key: "t-cur", text: "En cours de lecture", items: [] });
+        rows.push({ kind: "track", key: "cur", track: cur, cover: cur.cover, playing: true, items: [] });
+      }
+      // Entrée : passer directement à ce titre ; petit bouton : le retirer de la file
+      const addList = (key, title, list) => {
+        if (!list || !list.length) return;
+        rows.push({ kind: "title", key: "t-" + key, text: title, items: [] });
+        list.map(mapQueueTrack).forEach((t, i) =>
+          rows.push({
+            kind: "track",
+            key: key + (t.uid || t.uri) + i,
+            track: t,
+            cover: t.cover,
+            items: [
+              { activate: () => attempt(() => playerApi().skipToNext(queueRef(t)), "Impossible de lire ce titre") },
+              {
+                id: "remove",
+                icon: "close",
+                hint: "Retirer de la file d'attente",
+                activate: () => attempt(() => playerApi().removeFromQueue([queueRef(t)]), "Impossible de retirer ce titre"),
+              },
+            ],
+          })
+        );
+      };
+      const ctxName = safe(() => Spicetify.Player.data.context.metadata.context_description, "");
+      addList("q", "Suivant dans la file d'attente", queue.queued);
+      addList("n", ctxName ? `Suivant de : ${ctxName}` : "Ensuite", queue.nextUp);
+      if (!(queue.queued || []).length && !(queue.nextUp || []).length)
+        rows.push({
+          kind: "message",
+          key: "m",
+          text: "Rien à suivre. Pour ajouter un titre : sélectionne-le dans une playlist, ▶ puis Entrée.",
+          items: [],
+        });
+      return rows;
+    }
+
+    if (top.type === "history") {
+      if (!playHistory.length)
+        return [{ kind: "message", key: "m", text: "Aucun titre écouté pour l'instant", items: [] }];
+      const rows = [];
+      let day = null;
+      playHistory.forEach((e) => {
+        const d = dayLabel(e.at);
+        if (d !== day) rows.push({ kind: "title", key: "d-" + e.at, text: (day = d), items: [] });
+        rows.push({
+          kind: "track",
+          key: e.uri + e.at,
+          track: e,
+          cover: e.cover,
+          right: fmtClock(e.at),
+          items: [{ activate: () => playFromHistory(e) }, queueButton(e)],
+        });
+      });
+      return rows;
+    }
+
     if (top.type === "nowplaying") {
       const P = Spicetify.Player;
       const trackUri = safe(() => P.data.item.uri, null);
@@ -1220,7 +1519,12 @@ function Walktify() {
             },
           ],
         },
-        { kind: "npSeek", key: "np-seek", player, items: [{ id: "seek", seek: true, activate: () => P.togglePlay() }] },
+        {
+          kind: "npSeek",
+          key: "np-seek",
+          player,
+          items: [{ id: "seek", adjust: (dir) => seekBy(dir), activate: () => P.togglePlay() }],
+        },
         {
           kind: "npButtons",
           key: "np-buttons",
@@ -1234,10 +1538,16 @@ function Walktify() {
               round: true,
               icon: "repeat",
               on: player.repeat > 0,
-              badge: player.repeat === 2 ? "1" : null, // repeat single track
+              badge: player.repeat === 2 ? "1" : null, // répétition du titre seul
               activate: () => P.toggleRepeat(),
             },
           ],
+        },
+        {
+          kind: "npVolume",
+          key: "np-volume",
+          player,
+          items: [{ id: "volume", adjust: (dir) => volumeBy(dir), activate: toggleMute }],
         },
       ];
     }
@@ -1256,15 +1566,15 @@ function Walktify() {
       return { focus: { row, cols } };
     });
 
-  // ---------- effects
+  // ---------- effets
   useEffect(() => {
     loadHome().then(setHomeRows);
-    // Hides all of Spotify under Walktify (including the "…" menu top-left)
+    // Masque tout Spotify sous Walktify (y compris le menu "…" en haut à gauche)
     document.body.classList.add("wk-on");
     return () => document.body.classList.remove("wk-on");
   }, []);
 
-  // Editable playlists for the "add to playlist" screen
+  // Playlists modifiables pour l'écran "ajouter à une playlist"
   useEffect(() => {
     if (top.type !== "pick" || top.playlists !== null) return;
     const id = top.id;
@@ -1277,7 +1587,7 @@ function Walktify() {
     );
   }, [top.id]);
 
-  // Offline state of the page: subscribe to changes, like native pages
+  // État hors-ligne de la fiche : abonnement aux changements, comme les pages natives
   useEffect(() => {
     if (top.type !== "detail" || !DOWNLOADABLE.includes(top.item.type)) return;
     const id = top.id;
@@ -1297,8 +1607,8 @@ function Walktify() {
     return () => sub && sub.cancel && sub.cancel();
   }, [top.id]);
 
-  // During a download, the percentage is re-read every 2 s (in case
-  // the subscription only reports state changes, not progress)
+  // Pendant un téléchargement, le pourcentage est relu toutes les 2 s (au cas où
+  // l'abonnement ne signalerait que les changements d'état, pas la progression)
   const downloading = top.type === "detail" && top.offline && top.offline.state === "downloading";
   useEffect(() => {
     if (!downloading) return;
@@ -1318,7 +1628,7 @@ function Walktify() {
     return () => clearInterval(t);
   }, [top.id, downloading]);
 
-  // State of each track (green badges), in batches of 100 tracks
+  // État de chaque titre (pastilles vertes), par paquets de 100 titres
   useEffect(() => {
     if (top.type !== "detail" || !top.tracks || !top.tracks.length) return;
     const id = top.id;
@@ -1343,7 +1653,7 @@ function Walktify() {
     else if (document.activeElement === input) input.blur();
   });
 
-  // TV-style scrolling: a card row moves to the top, the selected card stays in 2nd position
+  // Défilement façon TV : une rangée de cartes remonte en haut, la carte sélectionnée reste en 2e position
   useEffect(() => {
     const content = contentRef.current;
     const rowEl = content && content.children[curRow];
@@ -1367,7 +1677,7 @@ function Walktify() {
     }
   }, [top.id, curRow, curCol, rows.length]);
 
-  // ---------- keyboard (wheels)
+  // ---------- clavier (molettes)
   const keyRef = useRef();
   keyRef.current = function onKey(e) {
     if (e.ctrlKey || e.altKey || e.metaKey) return;
@@ -1395,8 +1705,8 @@ function Walktify() {
 
     const len = rows[curRow] ? rows[curRow].items.length : 0;
     const curItem = rows[curRow] && rows[curRow].items[curCol];
-    if ((k === "ArrowLeft" || k === "ArrowRight") && curItem && curItem.seek) {
-      seekBy(k === "ArrowRight" ? 1 : -1);
+    if ((k === "ArrowLeft" || k === "ArrowRight") && curItem && curItem.adjust) {
+      curItem.adjust(k === "ArrowRight" ? 1 : -1);
       setTimeout(refreshPlayer, 120);
       done();
       return;
@@ -1405,8 +1715,9 @@ function Walktify() {
       const pos = focusable.indexOf(curRow);
       const next = focusable[clamp(pos + (k === "ArrowDown" ? 1 : -1), 0, focusable.length - 1)];
       if (next !== undefined) {
-        // Between two tile rows: keep the same column (grid)
-        const grid = rows[curRow].kind === "tiles" && rows[next].kind === "tiles";
+        // Entre deux rangées de tuiles, ou de titres (petit bouton de file d'attente) :
+        // on garde la même colonne (grille)
+        const grid = rows[curRow].kind === rows[next].kind && ["tiles", "track"].includes(rows[next].kind);
         setFocus(next, grid ? clamp(curCol, 0, rows[next].items.length - 1) : undefined);
       }
       done();
@@ -1435,7 +1746,7 @@ function Walktify() {
     return () => window.removeEventListener("keydown", f, true);
   }, []);
 
-  // ---------- render
+  // ---------- rendu
   return h(
     "div",
     { className: "wk-root" },
@@ -1489,7 +1800,7 @@ function Walktify() {
   );
 }
 
-// Rendered into <body> via a portal: the UI covers the whole window
+// Rendu dans <body> via un portail : l'interface recouvre toute la fenêtre
 function WalktifyRoot() {
   const RD = Spicetify.ReactDOM;
   return RD && RD.createPortal ? RD.createPortal(h(Walktify), document.body) : h(Walktify);

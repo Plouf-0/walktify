@@ -1,8 +1,8 @@
-/* Walktify v0.4.1 — landscape phone screen.
-   All sizes are in vh: the UI adapts to the final resolution. */
+/* Walktify v0.4.1 — écran de téléphone en paysage.
+   Toutes les tailles sont en vh : l'UI s'adapte à la résolution finale. */
 
-/* While Walktify is shown, the rest of Spotify is hidden
-   ("…" menu, native bars, popups). Bonus: nothing invisible gets drawn. */
+/* Tant que Walktify est affiché, tout le reste de Spotify est masqué
+   (menu "…", barres natives, popups). Bonus : rien d'invisible n'est dessiné. */
 body.wk-on> :not(.wk-root),
 body.wk-on> :not(.wk-root) * {
   visibility: hidden !important;
@@ -36,14 +36,14 @@ body.wk-on> :not(.wk-root) * {
   flex: 0 0 auto;
 }
 
-/* ---------------------------------------------------------------- sidebar */
+/* ---------------------------------------------------------------- barre latérale */
 .wk-rail {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2vh;
-  /* Spotify's native "…" menu is drawn top-left, outside the page:
-     keep this area empty so it doesn't overlap the gear. */
+  /* Le menu natif de Spotify ("…") est dessiné en haut à gauche, hors de la page :
+     on laisse cette zone vide pour qu'il ne se superpose pas à l'engrenage. */
   padding-top: max(2.5vh, 56px);
   background: #000;
   border-right: 0.3vh solid transparent;
@@ -54,7 +54,7 @@ body.wk-on> :not(.wk-root) * {
   border-right-color: var(--wk-accent);
 }
 
-/* Settings: small, discreet, at the very bottom; label only shows when selected */
+/* Réglages : petit, discret, tout en bas ; le libellé n'apparaît qu'à la sélection */
 .wk-rail {
   padding-bottom: 2vh;
 }
@@ -111,6 +111,9 @@ body.wk-on> :not(.wk-root) * {
 .wk-rail-label {
   font-size: 2.2vh;
   font-weight: 700;
+  /* "File d'attente" passe sur deux lignes */
+  text-align: center;
+  line-height: 1.15;
 }
 
 .wk-rail-dot {
@@ -123,7 +126,7 @@ body.wk-on> :not(.wk-root) * {
   background: var(--wk-accent);
 }
 
-/* ---------------------------------------------------------------- main area */
+/* ---------------------------------------------------------------- zone principale */
 .wk-main {
   display: flex;
   flex-direction: column;
@@ -159,7 +162,7 @@ body.wk-on> :not(.wk-root) * {
   position: relative;
   flex: 1 1 auto;
   overflow: hidden;
-  /* scrolling driven by Walktify, no scrollbar */
+  /* défilement piloté par Walktify, pas de barre */
   padding: 2vh 5vh 30vh;
 }
 
@@ -169,7 +172,7 @@ body.wk-on> :not(.wk-root) * {
   color: var(--wk-muted);
 }
 
-/* ---------------------------------------------------------------- shortcuts (tiles) */
+/* ---------------------------------------------------------------- raccourcis (tuiles) */
 .wk-tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -216,7 +219,7 @@ body.wk-on> :not(.wk-root) * {
   transform: scale(1.03);
 }
 
-/* ---------------------------------------------------------------- card rows */
+/* ---------------------------------------------------------------- rangées de cartes */
 .wk-row {
   padding-bottom: 3vh;
 }
@@ -233,7 +236,7 @@ body.wk-on> :not(.wk-root) * {
   gap: var(--wk-gap);
   overflow: hidden;
   padding: 2.5vh 2.5vh 1vh;
-  /* room for the scale-up + focus outline */
+  /* marge pour l'agrandissement + le contour au focus */
   margin: -2.5vh -2.5vh 0;
 }
 
@@ -286,7 +289,7 @@ body.wk-on> :not(.wk-root) * {
   font-weight: 700;
 }
 
-/* ---------------------------------------------------------------- buttons */
+/* ---------------------------------------------------------------- boutons */
 .wk-buttons {
   display: flex;
   gap: 2.5vh;
@@ -365,7 +368,7 @@ body.wk-on> :not(.wk-root) * {
   transform: scale(1.08);
 }
 
-/* ---------------------------------------------------------------- playlist / album page */
+/* ---------------------------------------------------------------- fiche playlist / album */
 .wk-detail {
   display: flex;
   gap: 5vh;
@@ -420,7 +423,7 @@ body.wk-on> :not(.wk-root) * {
   height: 3vh;
 }
 
-/* track list */
+/* liste des titres */
 .wk-tr {
   display: flex;
   align-items: center;
@@ -475,7 +478,7 @@ body.wk-on> :not(.wk-root) * {
   color: var(--wk-muted);
 }
 
-/* ---------------------------------------------------------------- search */
+/* ---------------------------------------------------------------- recherche */
 .wk-search {
   display: flex;
   align-items: center;
@@ -510,7 +513,7 @@ body.wk-on> :not(.wk-root) * {
   color: var(--wk-muted);
 }
 
-/* ---------------------------------------------------------------- now playing */
+/* ---------------------------------------------------------------- en cours de lecture */
 .wk-np {
   display: flex;
   gap: 6vh;
@@ -569,7 +572,7 @@ body.wk-on> :not(.wk-root) * {
   margin-top: 1vh;
 }
 
-/* Fallback cover for Liked Songs */
+/* Pochette de secours des Titres likés */
 .wk-cover-liked {
   display: flex;
   align-items: center;
@@ -583,7 +586,7 @@ body.wk-on> :not(.wk-root) * {
   height: 45%;
 }
 
-/* ---------------------------------------------------------------- page: Spotify-style header */
+/* ---------------------------------------------------------------- fiche : en-tête façon Spotify */
 .wk-hero-wrap {
   margin: -2vh -5vh 2vh;
   padding: 4vh 5vh 2vh;
@@ -642,7 +645,7 @@ body.wk-on> :not(.wk-root) * {
   font-weight: 600;
 }
 
-/* action bar: big play button, shuffle, download */
+/* barre d'actions : grand bouton lecture, aléatoire, téléchargement */
 .wk-actions {
   display: flex;
   align-items: center;
@@ -717,13 +720,13 @@ body.wk-on> :not(.wk-root) * {
   margin-left: 1vh;
 }
 
-/* ---------------------------------------------------------------- Now playing: cover | info grid
-   The info column always keeps room for the 5 buttons on a single line:
-   the cover is what shrinks if the screen is too narrow. */
+/* ---------------------------------------------------------------- En cours : grille pochette | infos
+   La colonne des infos garde toujours la place des 5 boutons sur une seule ligne :
+   c'est la pochette qui rétrécit si l'écran manque de largeur. */
 .wk-screen-nowplaying {
   display: grid;
   grid-template-columns: minmax(0, 62vh) minmax(68vh, 1fr);
-  grid-template-rows: auto auto auto;
+  grid-template-rows: auto auto auto auto;
   column-gap: 6vh;
   align-content: center;
   padding-bottom: 2vh;
@@ -735,7 +738,7 @@ body.wk-on> :not(.wk-root) * {
 
 .wk-screen-nowplaying .wk-np-cover {
   grid-column: 1;
-  grid-row: 1 / 4;
+  grid-row: 1 / 5;
   align-self: center;
   width: 100%;
   height: auto;
@@ -794,14 +797,14 @@ body.wk-on> :not(.wk-root) * {
   grid-column: 2;
   grid-row: 3;
   align-self: start;
-  padding-top: 3vh;
+  padding-top: 2.5vh;
 }
 
 .wk-np-buttons .wk-buttons {
   flex-wrap: nowrap;
 }
 
-/* focusable progress bar */
+/* barre de progression focusable */
 .wk-seek {
   margin: 0 -2vh;
   padding: 2vh;
@@ -848,7 +851,7 @@ body.wk-on> :not(.wk-root) * {
   color: #fff;
 }
 
-/* "Downloaded" badge before the artist, in the track list */
+/* Pastille "téléchargé" devant l'artiste, dans la liste des titres */
 .wk-tr-artist {
   display: flex;
   align-items: center;
@@ -879,7 +882,7 @@ body.wk-on> :not(.wk-root) * {
   white-space: nowrap;
 }
 
-/* Download in progress: circle blinks; removal confirmation: red */
+/* Téléchargement en cours : le cercle clignote ; confirmation du retrait : rouge */
 .wk-act.pending {
   color: var(--wk-accent);
   animation: wk-pulse 1.2s ease-in-out infinite;
@@ -891,18 +894,18 @@ body.wk-on> :not(.wk-root) * {
   box-shadow: 0 0 0 0.5vh #ff4d5e;
 }
 
-/* Page: small pause button (when the playlist is playing) */
+/* Fiche : petit bouton pause (quand la playlist est en lecture) */
 .wk-act-pause {
   color: #fff;
 }
 
-/* Smart Shuffle: the dot stays under the icon */
+/* Aléatoire amélioré : le point reste sous l'icône */
 .wk-act-shuffle.toggled::after,
 .wk-btn.toggled::after {
   background: currentColor;
 }
 
-/* "Add to playlist" list */
+/* Liste "ajouter à une playlist" */
 .wk-pick-cover {
   width: 7vh;
   height: 7vh;
@@ -915,7 +918,7 @@ body.wk-on> :not(.wk-root) * {
   font-size: 3.5vh;
 }
 
-/* Toast message */
+/* Message temporaire */
 .wk-toast {
   position: fixed;
   left: 50%;
@@ -931,7 +934,7 @@ body.wk-on> :not(.wk-root) * {
   box-shadow: 0 1vh 4vh rgba(0, 0, 0, 0.5);
 }
 
-/* "Added by Smart Shuffle" badge */
+/* Pastille "ajouté par l'aléatoire amélioré" */
 .wk-smart-badge {
   width: 2.8vh;
   height: 2.8vh;
@@ -944,4 +947,147 @@ body.wk-on> :not(.wk-root) * {
 .wk-playing .wk-smart-badge {
   width: 2.4vh;
   height: 2.4vh;
+}
+
+/* Volume (dernière rangée de "En cours") */
+.wk-vol {
+  grid-column: 2;
+  grid-row: 4;
+  display: flex;
+  align-items: center;
+  gap: 2vh;
+  margin: 2.5vh -2vh 0;
+  padding: 1.5vh 2vh;
+  border-radius: 1.5vh;
+  color: var(--wk-muted);
+  transition: background 150ms, box-shadow 150ms;
+}
+
+.wk-vol .wk-icon {
+  width: 4vh;
+  height: 4vh;
+  flex: 0 0 auto;
+}
+
+.wk-vol.focused {
+  background: var(--wk-surface);
+  box-shadow: 0 0 0 0.5vh var(--wk-accent);
+  color: #fff;
+}
+
+.wk-vol-bar {
+  position: relative;
+  flex: 0 1 40vh;
+  height: 1vh;
+  border-radius: 1vh;
+  background: #3a3a3a;
+  transition: height 150ms;
+}
+
+.wk-vol.focused .wk-vol-bar {
+  height: 1.6vh;
+}
+
+.wk-vol-fill {
+  height: 100%;
+  border-radius: 1vh;
+  background: #fff;
+  transition: width 120ms;
+}
+
+.wk-vol.focused .wk-vol-fill {
+  background: var(--wk-accent);
+}
+
+.wk-vol-knob {
+  position: absolute;
+  top: 50%;
+  width: 3vh;
+  height: 3vh;
+  margin: -1.5vh 0 0 -1.5vh;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  transition: left 120ms, opacity 150ms;
+}
+
+.wk-vol.focused .wk-vol-knob {
+  opacity: 1;
+}
+
+.wk-vol-pct {
+  font-size: 2.4vh;
+  white-space: nowrap;
+}
+/* ---------------------------------------------------------------- file d'attente, historique */
+.wk-list-title {
+  font-size: 3.2vh;
+  font-weight: 700;
+  margin: 3vh 0 1vh;
+}
+
+.wk-list-title:first-child {
+  margin-top: 0;
+}
+
+.wk-tr-cover {
+  width: 7vh;
+  height: 7vh;
+  object-fit: cover;
+  border-radius: 0.8vh;
+  flex: 0 0 auto;
+}
+
+.wk-tr-cover.wk-cover-empty {
+  font-size: 3.5vh;
+}
+
+.wk-tr.playing .wk-tr-name {
+  color: var(--wk-accent);
+}
+
+/* Petit bouton en bout de rangée de titre (ajouter à / retirer de la file d'attente).
+   Sa place est réservée sur toutes les rangées, il n'apparaît que sur la rangée sélectionnée. */
+.wk-tr-btn {
+  width: 6vh;
+  height: 6vh;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wk-muted);
+  visibility: hidden;
+  transition: transform 150ms ease-out, background 150ms, color 150ms;
+}
+
+.wk-tr-btn .wk-icon {
+  width: 3.6vh;
+  height: 3.6vh;
+}
+
+.wk-tr.focused .wk-tr-btn {
+  visibility: visible;
+}
+
+.wk-tr-btn.focused {
+  background: var(--wk-accent);
+  color: #000;
+  transform: scale(1.1);
+}
+
+/* Bouton sélectionné : la rangée reste repérable, mais c'est le bouton qui ressort */
+.wk-tr.on-btn {
+  border-left-color: transparent;
+}
+
+.wk-tr.on-btn .wk-tr-name {
+  color: #fff;
+  font-weight: 400;
+}
+
+.wk-tr-hint {
+  flex: 0 0 auto;
+  font-size: 2.4vh;
+  white-space: nowrap;
 }
